@@ -10,7 +10,7 @@ ChIndx = 0:3;
 FirstIndxY = 11;
 FirstIndxX = 11;
 MeasChIndxRange = 11:635;
-HACK = 0;  % this hack is to use ch2 for ch0 and ch3 for ch1
+HACK = 1;  % this hack is to use ch2 for ch0 and ch3 for ch1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global K X Y_i
@@ -152,119 +152,93 @@ end
 % analysis
 
 MidIndx = length(LTSi) / 2;
+Indx = 1:20;
 
 figure(31)
-subplot(2,2,1)
-hold on
-PhaseOrig = angle(StoreAlphaTau(:,1,2));
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 0 : Phase value after SAGE for LoS Component")
-hold off
 
-subplot(2,2,2)
-hold on
-PhaseOrig = angle(StoreAlphaTau(:,2,2));
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 1 : Phase value after SAGE for LoS Component")
-hold off
+for subpIndx = 1:4
+    subplot(2,2,subpIndx)
+    hold on
+    PhaseOrig = angle(StoreAlphaTau(:,subpIndx,2));
+    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+    plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
+    xlim([0 21])
+    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi])
+    ylabel("Phase in radians")
+    xlabel("Stable indx")
+    legend("Original angle","Angle with unwrap","Location",'best')
+    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value after SAGE for LoS Component";
+    title(titleStr)
+    hold off
+end
 
-subplot(2,2,3)
-hold on
-PhaseOrig = angle(StoreAlphaTau(:,3,2));
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 2 : Phase value after SAGE for LoS Component")
-hold off
-
-subplot(2,2,4)
-hold on
-PhaseOrig = angle(StoreAlphaTau(:,4,2));
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 3 : Phase value after SAGE for LoS Component")
-hold off
 
 %% Verifying Measurement data against SAGE output
 
-filename = 'Data_v4.xlsx';
+filename = 'Data.xlsx';
 A = xlsread(filename);
 
 MidIndx = length(LTSi) / 2;
 
 figure(32)
-subplot(2,2,1)
-hold on
-PhaseOrig = A(2:21,13);
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 0 : Phase value from Data sheet")
-hold off
+for subpIndx = 1:4
+    subplot(2,2,subpIndx)
+    hold on
+    PhaseOrig = A(2:21,(9 + 4*subpIndx) );
+    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+    plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
+    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi])
+    ylabel("Phase in radians")
+    xlabel("Stable indx")
+    legend("Original angle","Angle with unwrap","Location",'best')
+    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet";
+    title(titleStr)
+    hold off
+end
 
-subplot(2,2,2)
-hold on
-PhaseOrig = A(2:21,17);
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 1 : Phase value from Data sheet")
-hold off
 
-subplot(2,2,3)
-hold on
-PhaseOrig = A(2:21,21);
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 1 : Phase value from Data sheet")
-hold off
 
-subplot(2,2,4)
-hold on
-PhaseOrig = A(2:21,25);
-[~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-plot(LTSi,PhaseOrig,LTSi,PhaseUnwrap,'o')
-xline(LTSi)
-yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-ylabel("Phase in radians")
-xlabel("Samples/CIR-RATE")
-legend("Original angle","Angle with unwrap")
-title("Channel 1 : Phase value from Data sheet")
-hold off
+% %% incorporating Delay
+% 
+% if HACK == 1
+%     StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK.mat').StoreAlphaTau;
+% else
+%     StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
+% end
+% 
+% MidIndx = length(LTSi) / 2;
+% 
+% freq = 5.725 * 10^9;
+% PhaseWithoutTau = zeros(4,20);
+% for ChNo = 0
+% 
+%     PhaseOrig = angle(StoreAlphaTau(:,ChNo+1,2));
+%     [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+% 
+%     for Indx = 1:20
+%         TauDiff = StoreAlphaTau(Indx,ChNo+1,1) - StoreAlphaTau(1,ChNo+1,1)
+%         PhaseDiff = 2*pi*freq*TauDiff*6/10^9
+%         PhaseAlpha = PhaseUnwrap(Indx)
+%         FinalPhase = PhaseAlpha + PhaseDiff
+%         PhaseWithoutTau(ChNo + 1,Indx) = FinalPhase;
+%     end
+% end
+% 
+% figure(33)
+% for subpIndx = 1
+%     subplot(2,2,subpIndx)
+%     plot(PhaseWithoutTau(subpIndx,:))
+% end
+
+
+
+
+
+
+
+
+
+
 
 
 %% optimizing function
