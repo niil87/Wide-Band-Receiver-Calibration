@@ -2,7 +2,7 @@
 % inputs
 % Array : Contains all subcarriers stacked across consecutive time
 % The function does not perform frequency correction
-function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = UnwrapPhaseMonotone(Array,Pos,midPoint)
+function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = F_UnwrapPhaseMonotone(Array,Pos,midPoint)
 
     PhaseResultOriginal = Array;
     PhaseResultUnwind = Array;

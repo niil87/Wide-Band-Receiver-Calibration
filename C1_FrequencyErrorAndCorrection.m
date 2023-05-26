@@ -1,6 +1,8 @@
 %% Contributions by Nikhil Challa
 clear;clc; close all;
 
+tic
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INPUTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 B2BrefIndxRange = 11:20;    %% specify the B2B file name index range eg. cir_ch0_xx.dat
 ChNoRange = 0:3;            %% specify all the channels you are intersted in. 0-3 are valid values
@@ -15,6 +17,7 @@ format long
 mkdir MatFiles;
 
 %% identifying frequency offset and applying frequency correction
+
 PhaseOffsetX = zeros(NumChannels,CIR_RATE*SizeB2Bref);
 PhaseOffsetOrigX = zeros(NumChannels,CIR_RATE*SizeB2Bref);
 PhaseCorrectedX = zeros(NumChannels,CIR_RATE*SizeB2Bref);
@@ -42,14 +45,19 @@ for ChNo = ChNoRange
 
     end
 
-    [PhaseOffsetOrigX(ChNo+1,:),PhaseOffsetX(ChNo+1,:),~] = UnwrapPhase(x,K,1);
+    [PhaseOffsetOrigX(ChNo+1,:),PhaseOffsetX(ChNo+1,:),~] = F_UnwrapPhase(x,K,1);
 
-    figure(1 + 2*ChNo)
+    % figure(1 + 2*ChNo)
+    figure(1)
+    subplot(2,2,1 + ChNo)
     plot(PhaseOffsetX(ChNo+1,:))
     ylabel("Phase in radians")
-    xlabel("Samples")
-    titleStr = "Channel No:" + string(ChNo) + "  Phase value before removing frequency offset";
-    title(titleStr)
+    xlabel("Log Sample Index (sample time)")
+    ylim([0 50])
+    set(gca,"FontSize",14)
+    titleStr = "Channel No:" + string(ChNo);
+    title(titleStr,'FontSize',18)
+    sgtitle('Phase value before frequency error correction - B2B Data','FontSize',18)  
     
     c = polyfit(0:CIR_RATE*SizeB2Bref - 1,PhaseOffsetX(ChNo+1,:),1)
     
@@ -62,14 +70,19 @@ for ChNo = ChNoRange
         x_fcorr(ChNo + 1, StrIndx:EndIndx,1) = x(StrIndx:EndIndx)*exp(-1i*2*pi*freqOffset(ChNo+1)*i/CIR_RATE);
     end
 
-    [~,PhaseCorrectedX(ChNo+1,:),~] = UnwrapPhase(x_fcorr(ChNo + 1,:),K,1);
+    [~,PhaseCorrectedX(ChNo+1,:),~] = F_UnwrapPhase(x_fcorr(ChNo + 1,:),K,1);
     
-    figure(2 + 2*ChNo)
+    %figure(2 + 2*ChNo)
+    figure(2)
+    subplot(2,2,1 + ChNo)
     plot(PhaseCorrectedX(ChNo+1,:))
     ylabel("Phase in radians")
-    xlabel("Samples")
-    titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset";
-    title(titleStr)
+    xlabel("Log Sample Index (sample time)")
+    ylim([-0.02 0.02])
+    set(gca,"FontSize",14)
+    titleStr = "Channel No:" + string(ChNo);
+    title(titleStr,'FontSize',18)
+    sgtitle('Phase value after frequency error correction - B2B Data','FontSize',18) 
 
 end
 
@@ -123,18 +136,25 @@ for ChNo = ChNoRange
 
     end 
 
-    [PhaseCorrectedY(ChNo+1,:),PhaseCorrectedUnwrapY(ChNo+1,:),CorrPhase(ChNo+1,:)] = UnwrapPhase(y_fcorr(ChNo + 1,:),K,1);
+    [PhaseCorrectedY(ChNo+1,:),PhaseCorrectedUnwrapY(ChNo+1,:),CorrPhase(ChNo+1,:)] = F_UnwrapPhase(y_fcorr(ChNo + 1,:),K,1);
 
-    figure(9 + ChNo)
+    figure(3 + ChNo)
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(ChNo+1,1:CIR_RATE:end))
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
-    title("Phase value after removing frequency offset")
+    xlabel("Log Sample Index (every sec/skip rest)")
+    ylabel("Phase in radians")
+    legend("Original Phase","Unwrapped phase")
+    set(gca,"FontSize",14)
+    titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset - OTA Data";
+    title(titleStr,'FontSize',18)
     hold off
 
 end
 
-%save('MatFiles/y_fcorr.mat','y_fcorr','-v7.3');
+save('MatFiles/y_fcorr.mat','y_fcorr','-v7.3');
 save('MatFiles/PhaseCorrectedY.mat','PhaseCorrectedY');
 save('MatFiles/PhaseCorrectedUnwrapY.mat','PhaseCorrectedUnwrapY');
 save('MatFiles/CorrPhase.mat','CorrPhase');
+
+toc

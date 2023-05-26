@@ -10,7 +10,8 @@ ChIndx = 0:3;
 FirstIndxY = 11;
 FirstIndxX = 11;
 MeasChIndxRange = 11:635;
-HACK = 1;  % this hack is to use ch2 for ch0 and ch3 for ch1
+HACK = 0;  % 1 : this hack is to use ch2 for ch0 and ch3 for ch1, 2 : ch2 for all channels
+SLOPE_BY_2 = 1;  % this is for shifting the phase results from excel data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global K X Y_i
@@ -41,6 +42,9 @@ for ChNo = ChIndx
     if ((ChNo < 2) && (HACK == 1))
         disp(["Doing hack, using Ch", ChNo+2, " for Ch", ChNo])
         X = fft(x(ChNo+3,StartIndx:EndIndx)'); X(1) = 0;
+    elseif (HACK == 2)
+        disp(["Doing hack, using Ch2 for all cases"])
+        X = fft(x(3,StartIndx:EndIndx)'); X(1) = 0;
     else
         disp(["Processing Ch", ChNo])
         X = fft(x(ChNo+1,StartIndx:EndIndx)'); X(1) = 0;
@@ -133,6 +137,8 @@ end
 % Storing calculated values
 if HACK == 1
     save('Matfiles/StoreAlphaTau3_HACK.mat','StoreAlphaTau');
+elseif HACK == 2
+    save('Matfiles/StoreAlphaTau3_HACK2.mat','StoreAlphaTau');
 else
     save('Matfiles/StoreAlphaTau3.mat','StoreAlphaTau');
 end
@@ -142,6 +148,8 @@ end
 %% Loading values for plots
 if HACK == 1
     StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK.mat').StoreAlphaTau;
+elseif HACK == 2 
+    StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK2.mat').StoreAlphaTau;
 else
     StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
 end
@@ -163,7 +171,7 @@ for subpIndx = 1:4
     [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     xlim([0 21])
-    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi])
+    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable indx")
     legend("Original angle","Angle with unwrap","Location",'best')
@@ -173,13 +181,15 @@ for subpIndx = 1:4
 end
 
 
-%% Verifying Measurement data against SAGE output
+%% Verifying Measurement data (compare it against SAGE output)
 
-filename = 'Data.xlsx';
+filename = 'Data_v5.xlsx';
 A = xlsread(filename);
 
 MidIndx = length(LTSi) / 2;
+Indx = 1:20;
 
+FinalMeasPhase = zeros(4,length(LTSi));
 figure(32)
 for subpIndx = 1:4
     subplot(2,2,subpIndx)
@@ -187,58 +197,107 @@ for subpIndx = 1:4
     PhaseOrig = A(2:21,(9 + 4*subpIndx) );
     [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
-    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi])
+    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable indx")
     legend("Original angle","Angle with unwrap","Location",'best')
+    set(gca,"FontSize",14)
     titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet";
     title(titleStr)
     hold off
+    
+    Slope = PhaseUnwrap(end) - PhaseOrig(end);
+    SlopeShift = Slope/2;
+    if SLOPE_BY_2 == 0
+        NewPhase = PhaseOrig' - Slope/19*(0:19);
+    else
+        NewPhase = PhaseOrig' - SlopeShift/9.5*(-9.5:1:9.5) + SlopeShift;
+    end
+
+    % Here we do phase wrapping
+    for indx = 1:20
+        while ((NewPhase(indx) > pi)||(NewPhase(indx) <= -pi))
+            if (NewPhase(indx) > pi)
+                NewPhase(indx) = NewPhase(indx) - 2*pi;
+            elseif (NewPhase(indx) < -pi)
+                NewPhase(indx) = NewPhase(indx) + 2*pi;
+            end
+        end
+    end
+
+    FinalMeasPhase(subpIndx,:) = NewPhase;
+
+end
+
+doubleWrapping = 0;
+
+figure(33)
+for subpIndx = 1:4
+    subplot(2,2,subpIndx)
+    hold on
+    PhaseOrig = A(2:21,(9 + 4*subpIndx) );
+
+    % unwrapping adjusted phase for plotting
+    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(FinalMeasPhase(subpIndx,:),LTSi,MidIndx);
+    
+
+    plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
+    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
+    ylabel("Phase in radians")
+    xlabel("Stable indx")
+    legend("Original angle","Angle with unwrap and phase correction","Location",'best')
+    set(gca,"FontSize",14)
+    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet with phase correction";
+    title(titleStr,"FontSize",18)
+    hold off
+
+    % Need to do double slope correction if final points dont match
+    if SLOPE_BY_2 == 0 && PhaseUnwrap(end) ~= FinalMeasPhase(subpIndx,end)
+        doubleWrapping = 1;
+        disp("We need to correct the unwrapped phase again")
+        Slope = PhaseUnwrap(end) - FinalMeasPhase(subpIndx,end);
+        NewPhase = FinalMeasPhase(subpIndx,:) - Slope/19*(0:19);
+        % Here we do phase wrapping
+        for indx = 1:20
+            while ((NewPhase(indx) > pi)||(NewPhase(indx) <= -pi))
+                if (NewPhase(indx) > pi)
+                    NewPhase(indx) = NewPhase(indx) - 2*pi;
+                elseif (NewPhase(indx) < -pi)
+                    NewPhase(indx) = NewPhase(indx) + 2*pi;
+                end
+            end
+        end
+
+        FinalMeasPhase(subpIndx,:) = NewPhase;
+    end
+
+end
+
+% In figure 33, we can clearly see there is a problem with Using wrapped
+% phased to determine unwrapped phase when the phase change exceeds 2pi as
+% seen in last point in figure 32. We use "double slope correction" 
+
+if doubleWrapping == 1 && SLOPE_BY_2 == 0
+    figure(34)
+    for subpIndx = 1:4
+        subplot(2,2,subpIndx)
+        hold on
+        PhaseOrig = FinalMeasPhase(subpIndx,:);
+        [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+        plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
+        yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
+        ylabel("Phase in radians")
+        xlabel("Stable indx")
+        legend("Original angle","Angle with unwrap","Location",'best')
+        set(gca,"FontSize",14)
+        titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet with phase correction";
+        title(titleStr,'FontSize',18)
+        hold off
+    end
 end
 
 
-
-% %% incorporating Delay
-% 
-% if HACK == 1
-%     StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK.mat').StoreAlphaTau;
-% else
-%     StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
-% end
-% 
-% MidIndx = length(LTSi) / 2;
-% 
-% freq = 5.725 * 10^9;
-% PhaseWithoutTau = zeros(4,20);
-% for ChNo = 0
-% 
-%     PhaseOrig = angle(StoreAlphaTau(:,ChNo+1,2));
-%     [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-% 
-%     for Indx = 1:20
-%         TauDiff = StoreAlphaTau(Indx,ChNo+1,1) - StoreAlphaTau(1,ChNo+1,1)
-%         PhaseDiff = 2*pi*freq*TauDiff*6/10^9
-%         PhaseAlpha = PhaseUnwrap(Indx)
-%         FinalPhase = PhaseAlpha + PhaseDiff
-%         PhaseWithoutTau(ChNo + 1,Indx) = FinalPhase;
-%     end
-% end
-% 
-% figure(33)
-% for subpIndx = 1
-%     subplot(2,2,subpIndx)
-%     plot(PhaseWithoutTau(subpIndx,:))
-% end
-
-
-
-
-
-
-
-
-
-
+save('Matfiles/FinalMeasPhase.mat','FinalMeasPhase');
 
 
 %% optimizing function

@@ -7,7 +7,7 @@
 % 1. you provide original ofdm signal
 % 2. you provide phase per time stamp 
 % The function does not perform frequency correction
-function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = UnwrapPhase(Array,NumSC,opt)
+function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = F_UnwrapPhase(Array,NumSC,opt)
 
     if not(isrow(Array) || iscolumn(Array))
         disp("The signal input must be either a column or row vector and not a matrix");
@@ -26,7 +26,7 @@ function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = UnwrapPhase(Array,N
         Y_base = Array(1:NumSC);
         PrevAngle = 0;
     elseif opt == 2
-        PrevAngle = angle(Array(1));
+        PrevAngle = (Array(1));
         PhaseResultOriginal(1) = PrevAngle;
         PhaseResultUnwind(1) = PrevAngle;
     end
@@ -39,7 +39,7 @@ function [PhaseResultOriginal,PhaseResultUnwind,CorrPhase] = UnwrapPhase(Array,N
             Y = Array(StrIndx:EndIndx);
             AngleWrtBase = angle((Y_base' *Y)/norm(Y_base)^2);
         elseif opt == 2
-            AngleWrtBase = angle(Array(timeIndx));
+            AngleWrtBase = (Array(timeIndx));
         end
 
         PhaseResultOriginal(timeIndx) = AngleWrtBase;
