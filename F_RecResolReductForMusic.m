@@ -2,11 +2,11 @@ function doa = F_RecResolReductForMusic(V,D,timeStep)
 
     doa = 0;
     decPlaces = 15;
-    while(doa == 0)
+    while(doa == 0 && decPlaces > 10)
         V = round(V,decPlaces);
         CovMat = V*D*V';
         try
-            doa = musicdoa(CovMat,1)
+            doa = musicdoa(CovMat,1,'ScanAngles',[-90:0.1:90]);
             disp(["DOA Attempt successful for TimeStep:" + timeStep + " doasSage value:" + doa]);
         catch
             decPlaces = decPlaces - 1;

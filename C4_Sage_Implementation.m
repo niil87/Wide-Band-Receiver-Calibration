@@ -12,8 +12,6 @@ ChIndx = 0:3;
 FirstIndxY = 11;
 FirstIndxX = 11;
 MeasChIndxRange = 11:635;
-HACK = 0;  % 0 : No Hack, 1 : Hack with ch2 for ch0 and ch3 for ch1, 2 : Hack with ch2 for all channels
-SLOPE_BY_2 = 1;  % this is for shifting the phase results from excel data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global K X Y_i
@@ -34,23 +32,14 @@ ChAmp = zeros(1,length(LTSi));
 x = load('MatFiles/x_fcorr.mat').x_fcorr;
 y = load('MatFiles/y_fcorr.mat').y_fcorr;
 
-
 MaxIndx = 0;
 for ChNo = ChIndx
 
     StartIndx = (B2BrefIndx - FirstIndxX)*K*200 + 1;
     EndIndx = StartIndx + K - 1;
 
-    if ((ChNo < 2) && (HACK == 1))
-        disp(["Doing hack, using Ch", ChNo+2, " for Ch", ChNo])
-        X = fft(x(ChNo+3,StartIndx:EndIndx)'); X(1) = 0;
-    elseif (HACK == 2)
-        disp(["Doing hack, using Ch2 for all cases"])
-        X = fft(x(3,StartIndx:EndIndx)'); X(1) = 0;
-    else
-        disp(["Processing Ch", ChNo])
-        X = fft(x(ChNo+1,StartIndx:EndIndx)'); X(1) = 0;
-    end
+    disp(["Processing Ch", ChNo])
+    X = fft(x(ChNo+1,StartIndx:EndIndx)'); X(1) = 0;
 
     options = optimoptions('fminunc',"Display","off");
 
@@ -141,24 +130,13 @@ for ChNo = ChIndx
 end
 
 % Storing calculated values
-if HACK == 1
-    save('Matfiles/StoreAlphaTau3_HACK.mat','StoreAlphaTau');
-elseif HACK == 2
-    save('Matfiles/StoreAlphaTau3_HACK2.mat','StoreAlphaTau');
-else
-    save('Matfiles/StoreAlphaTau3.mat','StoreAlphaTau');
-end
+save('Matfiles/StoreAlphaTau3.mat','StoreAlphaTau');
 
 % incase variables are overwritten.
 
 %% Loading values for plots
-if HACK == 1
-    StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK.mat').StoreAlphaTau;
-elseif HACK == 2 
-    StoreAlphaTau = load('Matfiles/StoreAlphaTau3_HACK2.mat').StoreAlphaTau;
-else
-    StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
-end
+StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
+
 
 % for unwrapping we use different property as compared to UnwrapPhase.m
 % Here we know that phase can only be monotonically increasing before

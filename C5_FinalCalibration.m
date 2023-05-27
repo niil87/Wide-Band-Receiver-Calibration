@@ -3,18 +3,8 @@ clear;clc; close all;
 
 tic
 
-HACK = 0;  % 0 : No Hack, 1 : Hack with ch2 for ch0 and ch3 for ch1, 2 : Hack with ch2 for all channels
-
-if HACK == 0
-    StoreAlphaTau = load('MatFiles/StoreAlphaTau3.mat').StoreAlphaTau;
-elseif HACK == 1
-    StoreAlphaTau = load('MatFiles/StoreAlphaTau3_HACK1.mat').StoreAlphaTau;
-else
-    StoreAlphaTau = load('MatFiles/StoreAlphaTau3_HACK2.mat').StoreAlphaTau;
-end
-
+StoreAlphaTau = load('MatFiles/StoreAlphaTau3.mat').StoreAlphaTau;
 FinalMeasPhase = load('Matfiles/FinalMeasPhase.mat','FinalMeasPhase').FinalMeasPhase;
-A = xlsread('Data.xlsx');
 
 freq = 5.725*10^9; % carrier frequency
 
@@ -38,8 +28,8 @@ PhaseUnwrap = zeros(length(ChNoRange),NumPos);
 for ChNo = ChNoRange 
     for indx = 1:NumPos
         a_est = (StoreAlphaTau(indx,ChNo+1,2));
-        a_real = (PhaseCalcCh{ChNo+1}(indx));
-        g(ChNo+1,indx) = conj(a_est)*a_real/(a_est*conj(a_est));
+        a_meas = (PhaseCalcCh{ChNo+1}(indx));
+        g(ChNo+1,indx) = conj(a_est)*a_meas/(a_est*conj(a_est));
     end
     PhaseOrig = angle(g(ChNo+1,:));
     [~,PhaseUnwrap(ChNo+1,:),~] = F_UnwrapPhase(PhaseOrig,1,2);
