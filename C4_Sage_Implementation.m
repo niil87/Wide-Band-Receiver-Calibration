@@ -1,6 +1,8 @@
 %% Contributions by Nikhil Challa
 clear;clc; close all;
 
+tic
+
 %%%%%%%%%%%%%%  INPUTS %%%%%%%%%%%%%%%%%%
 K = 1024;    % number of samples
 L = 10;      % number of multipath
@@ -10,7 +12,7 @@ ChIndx = 0:3;
 FirstIndxY = 11;
 FirstIndxX = 11;
 MeasChIndxRange = 11:635;
-HACK = 0;  % 1 : this hack is to use ch2 for ch0 and ch3 for ch1, 2 : ch2 for all channels
+HACK = 0;  % 0 : No Hack, 1 : Hack with ch2 for ch0 and ch3 for ch1, 2 : Hack with ch2 for all channels
 SLOPE_BY_2 = 1;  % this is for shifting the phase results from excel data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -115,7 +117,11 @@ for ChNo = ChIndx
                     Pwr = abs( Ac*Y_i/(norm(X,"fro")^2) ) ;
                     figure(1)
                     plot(Pwr(1:plotLimit))
-                    title("Plot of multipath with sequential elimination")
+                    ylabel("Scaled Amplitude")
+                    xlabel("Time Delay")
+                    ylim([0 1])
+                    set(gca,"FontSize",14)
+                    title("Plot of multipath with sequential elimination",'FontSize',18)
                     grid on
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -168,7 +174,7 @@ for subpIndx = 1:4
     subplot(2,2,subpIndx)
     hold on
     PhaseOrig = angle(StoreAlphaTau(:,subpIndx,2));
-    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+    [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     xlim([0 21])
     yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
@@ -176,14 +182,14 @@ for subpIndx = 1:4
     xlabel("Stable indx")
     legend("Original angle","Angle with unwrap","Location",'best')
     titleStr = "Channel " + string((subpIndx-1)) + " : Phase value after SAGE for LoS Component";
-    title(titleStr)
+    title(titleStr,'FontSize',18)
     hold off
 end
 
 
 %% Verifying Measurement data (compare it against SAGE output)
 
-filename = 'Data_v5.xlsx';
+filename = 'Data.xlsx';
 A = xlsread(filename);
 
 MidIndx = length(LTSi) / 2;
@@ -191,19 +197,20 @@ Indx = 1:20;
 
 FinalMeasPhase = zeros(4,length(LTSi));
 figure(32)
+sgtitle('Phase value from Data sheet','FontSize',18) 
 for subpIndx = 1:4
     subplot(2,2,subpIndx)
     hold on
     PhaseOrig = A(2:21,(9 + 4*subpIndx) );
-    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
+    [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable indx")
     legend("Original angle","Angle with unwrap","Location",'best')
     set(gca,"FontSize",14)
-    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet";
-    title(titleStr)
+    titleStr = "Channel " + string((subpIndx-1));
+    title(titleStr,'FontSize',18)
     hold off
     
     Slope = PhaseUnwrap(end) - PhaseOrig(end);
@@ -229,76 +236,35 @@ for subpIndx = 1:4
 
 end
 
+
+
 doubleWrapping = 0;
 
 figure(33)
+sgtitle('Phase value from Data sheet with phase correction','FontSize',18) 
 for subpIndx = 1:4
     subplot(2,2,subpIndx)
     hold on
     PhaseOrig = A(2:21,(9 + 4*subpIndx) );
 
     % unwrapping adjusted phase for plotting
-    [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(FinalMeasPhase(subpIndx,:),LTSi,MidIndx);
+    [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(FinalMeasPhase(subpIndx,:),LTSi,MidIndx);
     
-
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable indx")
     legend("Original angle","Angle with unwrap and phase correction","Location",'best')
     set(gca,"FontSize",14)
-    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet with phase correction";
+    titleStr = "Channel " + string((subpIndx-1));
     title(titleStr,"FontSize",18)
     hold off
 
-    % Need to do double slope correction if final points dont match
-    if SLOPE_BY_2 == 0 && PhaseUnwrap(end) ~= FinalMeasPhase(subpIndx,end)
-        doubleWrapping = 1;
-        disp("We need to correct the unwrapped phase again")
-        Slope = PhaseUnwrap(end) - FinalMeasPhase(subpIndx,end);
-        NewPhase = FinalMeasPhase(subpIndx,:) - Slope/19*(0:19);
-        % Here we do phase wrapping
-        for indx = 1:20
-            while ((NewPhase(indx) > pi)||(NewPhase(indx) <= -pi))
-                if (NewPhase(indx) > pi)
-                    NewPhase(indx) = NewPhase(indx) - 2*pi;
-                elseif (NewPhase(indx) < -pi)
-                    NewPhase(indx) = NewPhase(indx) + 2*pi;
-                end
-            end
-        end
-
-        FinalMeasPhase(subpIndx,:) = NewPhase;
-    end
-
 end
-
-% In figure 33, we can clearly see there is a problem with Using wrapped
-% phased to determine unwrapped phase when the phase change exceeds 2pi as
-% seen in last point in figure 32. We use "double slope correction" 
-
-if doubleWrapping == 1 && SLOPE_BY_2 == 0
-    figure(34)
-    for subpIndx = 1:4
-        subplot(2,2,subpIndx)
-        hold on
-        PhaseOrig = FinalMeasPhase(subpIndx,:);
-        [~,PhaseUnwrap,~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
-        plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
-        yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
-        ylabel("Phase in radians")
-        xlabel("Stable indx")
-        legend("Original angle","Angle with unwrap","Location",'best')
-        set(gca,"FontSize",14)
-        titleStr = "Channel " + string((subpIndx-1)) + " : Phase value from Data sheet with phase correction";
-        title(titleStr,'FontSize',18)
-        hold off
-    end
-end
-
 
 save('Matfiles/FinalMeasPhase.mat','FinalMeasPhase');
 
+toc
 
 %% optimizing function
 

@@ -1,6 +1,7 @@
 %% Contributions by Nikhil Challa
 clear;clc; close all;
 
+tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% INPUTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 NumCenters = 20;
 
@@ -34,8 +35,9 @@ LogIndexes = zeros(NumCh,NumCenters);
 figure(20)
 plot(PhaseCorrectedUnwrapY(1,:))
 ylabel("Phase in radians")
-xlabel("Samples")
-title("Unwrapped phase for Channel 0")
+xlabel("Log Sample Index (every sec/skip rest)")
+set(gca,"FontSize",14)
+title("Unwrapped phase for Channel 0",'FontSize',18)
 
 exit = 0;
 SumDLimit = 1;
@@ -144,8 +146,11 @@ figure(21)
 plot(PhaseCorrectedUnwrapY(1,:))
 xline(PlotIndx*200)
 ylabel("Phase in radians")
-xlabel("Samples")
-title("Unwrapped phase for Channel 0 with stable index positions")
+xlabel("Log Sample Index (every sec/skip rest)")
+set(gca,"FontSize",14)
+title("Unwrapped phase for Channel 0 with stable index positions",'FontSize',18)
     
 
 save('MatFiles/BestLogIndexes.mat','BestLogIndexes');
+
+toc

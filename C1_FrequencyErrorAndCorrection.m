@@ -138,7 +138,8 @@ for ChNo = ChNoRange
 
     [PhaseCorrectedY(ChNo+1,:),PhaseCorrectedUnwrapY(ChNo+1,:),CorrPhase(ChNo+1,:)] = F_UnwrapPhase(y_fcorr(ChNo + 1,:),K,1);
 
-    figure(3 + ChNo)
+    figure(3)
+    subplot(2,2,1 + ChNo)
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(ChNo+1,1:CIR_RATE:end))
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
@@ -146,11 +147,13 @@ for ChNo = ChNoRange
     ylabel("Phase in radians")
     legend("Original Phase","Unwrapped phase")
     set(gca,"FontSize",14)
-    titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset - OTA Data";
+    titleStr = "Channel No:" + string(ChNo);
     title(titleStr,'FontSize',18)
     hold off
 
 end
+
+sgtitle('Phase value after removing frequency offset - OTA Data','FontSize',18) 
 
 save('MatFiles/y_fcorr.mat','y_fcorr','-v7.3');
 save('MatFiles/PhaseCorrectedY.mat','PhaseCorrectedY');

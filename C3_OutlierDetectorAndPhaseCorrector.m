@@ -1,6 +1,8 @@
 %% Contributions by Nikhil Challa
 clear;clc; close all;
 
+tic 
+
 % The code has the following limitations
 % 1. It assumes only 1 outlier at a time for input signal in array of antennas
 % 2. It assumes 3 or more array of antennas otherwise outlier will not work
@@ -24,9 +26,10 @@ for ChNo = ChNoRange
     xline(BestLogIndexes)
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
     ylabel("Phase in radians")
-    xlabel("Samples/CIR-RATE")
+    xlabel("Log Sample Index (every sec/skip rest)")
+    set(gca,"FontSize",14)
     titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset";
-    title(titleStr)
+    title(titleStr,'FontSize',18)
     hold off
 
 end
@@ -43,6 +46,8 @@ outlier = zeros(1,floor(length(PhaseCorrUnWrapOutlierFixedY)/200));
 outlier(1) = ~ isempty( find(isoutlier(PhaseCorrUnWrapOutlierFixedY(:,1)),1) );
 outlier(2) = ~ isempty( find(isoutlier(PhaseCorrUnWrapOutlierFixedY(:,201)),1) );
 outIndx = 3;
+BadIndx = 0;
+BadCh = -100;
 for indx = 401 : 200 : length(PhaseCorrUnWrapOutlierFixedY)
     outlier(outIndx) = ~ isempty( find(isoutlier(PhaseCorrUnWrapOutlierFixedY(:,indx)),1) );
     if (outlier(outIndx - 2) && outlier(outIndx - 1) && outlier(outIndx))
@@ -83,16 +88,83 @@ for ChNo = ChNoRange
     xline(BestLogIndexes)
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
     ylabel("Phase in radians")
-    xlabel("Samples/CIR-RATE")
+    xlabel("Log Sample Index (every sec/skip rest)")
+    set(gca,"FontSize",14)
     titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset and Unwrap correction";
-    title(titleStr)
+    title(titleStr,'FontSize',18)
     hold off
 
+
+    % We attempt to plot one (and only one) case of incorrect phase wrapping
+    IndxRange = BadIndx - 200 : 1 : BadIndx;  % since we start from bad case and go backward, the issue will be seen in previous 200 samples at max
+    Offset = PhaseCorrectedY(:,IndxRange(1)) - PhaseCorrectedUnwrapY(:,IndxRange(1));
+    TempPh = PhaseCorrectedY(:,IndxRange) - Offset;
+
+    % to determine limits on Y-axis
+    XlimMin = floor(min([ PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) - 1;
+    XlimMax = ceil(max([PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) + 1;
+
+    figure(9)
+    subplot(2,2,ChNo + 1)
+    hold on
+    plot( IndxRange, PhaseCorrectedUnwrapY(ChNo+1,IndxRange), "rx",IndxRange, TempPh(ChNo+1,:),'bo')
+    ylabel("Phase in radians")
+    xlabel("Log Sample Index (sample time)")
+    ylim([XlimMin  XlimMax])
+    xlim([min(IndxRange) max(IndxRange)])
+    legend("Unwrapped Attempt","Original Phase","Location","best")
+    set(gca,"FontSize",14)
+    titleStr = "Channel No:" + string(ChNo);
+    title(titleStr,'FontSize',18)
+    hold off
+
+
 end
+
+sgtitle('Incorrect Phase unwrapping example','FontSize',18) 
 
 save('MatFiles/PhaseCorrUnWrapOutlierFixedY.mat','PhaseCorrUnWrapOutlierFixedY');
 save('MatFiles/CorrPhaseOutlierFixed.mat','CorrPhaseOutlierFixed');
 
+
+% Attempt to box out the incorrect phase unwrapping
+% the factor of 20, needs to be decided based on number of 
+window = floor(length(MeasChIndxRange)/length(BestLogIndexes));
+Range = (BadIndx-CIR_RATE*window):(BadIndx+CIR_RATE*window);
+Lx = floor(BadIndx/200) - window;
+Ly = floor(min(PhaseCorrectedUnwrapY(BadCh,Range)));
+Hx = window*2;
+Hy = ceil(max(PhaseCorrectedUnwrapY(BadCh,Range))) - Ly;
+
+figure(10)
+subplot(2,1,1)
+hold on
+plot(MeasChIndxRange,PhaseCorrectedY(BadCh,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(BadCh,1:CIR_RATE:end))
+xline(BestLogIndexes)
+yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
+ylabel("Phase in radians")
+xlabel("Log Sample Index (every sec/skip rest)")
+rectangle('Position',[Lx Ly Hx Hy],'EdgeColor','g')
+set(gca,"FontSize",14)
+titleStr = "Channel No:" + string(ChNo) + "  Phase value with Unwrapping Error";
+title(titleStr,'FontSize',18)
+hold off 
+
+subplot(2,1,2)
+hold on
+plot(MeasChIndxRange,PhaseCorrectedY(BadCh,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrUnWrapOutlierFixedY(BadCh,1:CIR_RATE:end))
+xline(BestLogIndexes)
+yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
+ylabel("Phase in radians")
+xlabel("Log Sample Index (every sec/skip rest)")
+rectangle('Position',[Lx Ly Hx Hy],'EdgeColor','g')
+set(gca,"FontSize",14)
+titleStr = "Channel No:" + string(ChNo) + "  Phase value with Unwrapping Error Fixed";
+title(titleStr,'FontSize',18)
+hold off 
+
+
+toc
 
     
 
