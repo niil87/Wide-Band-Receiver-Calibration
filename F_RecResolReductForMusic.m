@@ -2,7 +2,7 @@ function doa = F_RecResolReductForMusic(V,D,timeStep)
 
     doa = 0;
     decPlaces = 15;
-    while(doa == 0 && decPlaces > 10)
+    while(doa == 0 && decPlaces > 5)
         V = round(V,decPlaces);
         CovMat = V*D*V';
         try
