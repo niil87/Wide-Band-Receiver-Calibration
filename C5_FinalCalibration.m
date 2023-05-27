@@ -16,10 +16,6 @@ end
 FinalMeasPhase = load('Matfiles/FinalMeasPhase.mat','FinalMeasPhase').FinalMeasPhase;
 A = xlsread('Data.xlsx');
 
-% 0 : Use slope adjusted phase value from Excel
-% 1 : Use Original data or excel sheet directly with no phase adjustment 
-USE_ORIG_MEAS_DATA = 0;
-
 freq = 5.725*10^9; % carrier frequency
 
 SamplingTime = 2*10^-9;
@@ -28,20 +24,11 @@ ChNoRange = 0:3;
 
 % Note we are multiplying the (-ve) phase contribution from propagation to remove
 % this phase on the OTA signal, to get phase contribution from the RF
-% device (hence the missing sign below)
-if USE_ORIG_MEAS_DATA == 0
-    PhaseCalcCh{1} = exp(FinalMeasPhase(1,:).*1i);
-    PhaseCalcCh{2} = exp(FinalMeasPhase(2,:).*1i);
-    PhaseCalcCh{3} = exp(FinalMeasPhase(3,:).*1i);
-    PhaseCalcCh{4} = exp(FinalMeasPhase(4,:).*1i);
-else
-    PhaseCalcCh{1} = exp(A(2:21,13).*1i);
-    PhaseCalcCh{2} = exp(A(2:21,17).*1i);
-    PhaseCalcCh{3} = exp(A(2:21,21).*1i);
-    PhaseCalcCh{4} = exp(A(2:21,25).*1i);
-end
-
-
+% device (hence the missing -ve sign below)
+PhaseCalcCh{1} = exp(FinalMeasPhase(1,:).*1i);
+PhaseCalcCh{2} = exp(FinalMeasPhase(2,:).*1i);
+PhaseCalcCh{3} = exp(FinalMeasPhase(3,:).*1i);
+PhaseCalcCh{4} = exp(FinalMeasPhase(4,:).*1i);
 
 NumPos = size(StoreAlphaTau,1);
 
@@ -55,9 +42,7 @@ for ChNo = ChNoRange
         g(ChNo+1,indx) = conj(a_est)*a_real/(a_est*conj(a_est));
     end
     PhaseOrig = angle(g(ChNo+1,:));
-    %[~,PhaseUnwrap(ChNo+1,:),~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,10);
     [~,PhaseUnwrap(ChNo+1,:),~] = F_UnwrapPhase(PhaseOrig,1,2);
-    
 end
 
 Xindx = 1:NumPos;

@@ -18,9 +18,11 @@ ChNoRange = 0:3;
 MeasChIndxRange = 11:635; 
 PhaseCorrUnWrapOutlierFixedY = PhaseCorrectedUnwrapY;
 CorrPhaseOutlierFixed = CorrPhase;
+    
+figure(1)
+sgtitle('Phase value for each channel with phase unwrapping (Error in Channel 3)','FontSize',18) 
 for ChNo = ChNoRange
-
-    figure(1 + ChNo)
+    subplot(2,2,1+ChNo)
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(ChNo+1,1:CIR_RATE:end))
     xline(BestLogIndexes)
@@ -28,10 +30,9 @@ for ChNo = ChNoRange
     ylabel("Phase in radians")
     xlabel("Log Sample Index (every sec/skip rest)")
     set(gca,"FontSize",14)
-    titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset";
+    titleStr = "Channel No:" + string(ChNo);
     title(titleStr,'FontSize',18)
     hold off
-
 end
 
 
@@ -79,10 +80,10 @@ for indx = 401 : 200 : length(PhaseCorrUnWrapOutlierFixedY)
 
 end
 
-
+figure(2)
+sgtitle('Phase value for each channel with phase unwrapping and error correction','FontSize',18) 
 for ChNo = ChNoRange
-
-    figure(5 + ChNo)
+    subplot(2,2,ChNo + 1)
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrUnWrapOutlierFixedY(ChNo+1,1:CIR_RATE:end))
     xline(BestLogIndexes)
@@ -90,11 +91,14 @@ for ChNo = ChNoRange
     ylabel("Phase in radians")
     xlabel("Log Sample Index (every sec/skip rest)")
     set(gca,"FontSize",14)
-    titleStr = "Channel No:" + string(ChNo) + "  Phase value after removing frequency offset and Unwrap correction";
+    titleStr = "Channel No:" + string(ChNo);
     title(titleStr,'FontSize',18)
     hold off
+end
 
-
+figure(3)
+sgtitle('Incorrect Phase unwrapping example','FontSize',18) 
+for ChNo = ChNoRange
     % We attempt to plot one (and only one) case of incorrect phase wrapping
     IndxRange = BadIndx - 200 : 1 : BadIndx;  % since we start from bad case and go backward, the issue will be seen in previous 200 samples at max
     Offset = PhaseCorrectedY(:,IndxRange(1)) - PhaseCorrectedUnwrapY(:,IndxRange(1));
@@ -104,7 +108,6 @@ for ChNo = ChNoRange
     XlimMin = floor(min([ PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) - 1;
     XlimMax = ceil(max([PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) + 1;
 
-    figure(9)
     subplot(2,2,ChNo + 1)
     hold on
     plot( IndxRange, PhaseCorrectedUnwrapY(ChNo+1,IndxRange), "rx",IndxRange, TempPh(ChNo+1,:),'bo')
@@ -118,10 +121,9 @@ for ChNo = ChNoRange
     title(titleStr,'FontSize',18)
     hold off
 
-
 end
 
-sgtitle('Incorrect Phase unwrapping example','FontSize',18) 
+
 
 save('MatFiles/PhaseCorrUnWrapOutlierFixedY.mat','PhaseCorrUnWrapOutlierFixedY');
 save('MatFiles/CorrPhaseOutlierFixed.mat','CorrPhaseOutlierFixed');
@@ -136,7 +138,7 @@ Ly = floor(min(PhaseCorrectedUnwrapY(BadCh,Range)));
 Hx = window*2;
 Hy = ceil(max(PhaseCorrectedUnwrapY(BadCh,Range))) - Ly;
 
-figure(10)
+figure(4)
 subplot(2,1,1)
 hold on
 plot(MeasChIndxRange,PhaseCorrectedY(BadCh,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(BadCh,1:CIR_RATE:end))

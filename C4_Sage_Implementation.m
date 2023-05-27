@@ -208,7 +208,7 @@ for subpIndx = 1:4
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
-    xlabel("Stable indx")
+    xlabel("Stable index")
     legend("Original angle","Angle with unwrap","Location",'best')
     set(gca,"FontSize",14)
     titleStr = "Channel " + string((subpIndx-1));
