@@ -179,10 +179,12 @@ for subpIndx = 1:4
     xlim([0 21])
     yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
-    xlabel("Stable indx")
-    legend("Original angle","Angle with unwrap","Location",'best')
-    titleStr = "Channel " + string((subpIndx-1)) + " : Phase value after SAGE for LoS Component";
+    xlabel("Stable index")
+    legend("Original phase","Unwrapped phase","Location",'best')
+    set(gca,"FontSize",14)
+    titleStr = "Channel " + string((subpIndx-1));
     title(titleStr,'FontSize',18)
+    sgtitle('Phase value after SAGE for LoS Component','FontSize',18) 
     hold off
 end
 
@@ -213,52 +215,7 @@ for subpIndx = 1:4
     title(titleStr,'FontSize',18)
     hold off
     
-    Slope = PhaseUnwrap(end) - PhaseOrig(end);
-    SlopeShift = Slope/2;
-    if SLOPE_BY_2 == 0
-        NewPhase = PhaseOrig' - Slope/19*(0:19);
-    else
-        NewPhase = PhaseOrig' - SlopeShift/9.5*(-9.5:1:9.5) + SlopeShift;
-    end
-
-    % Here we do phase wrapping
-    for indx = 1:20
-        while ((NewPhase(indx) > pi)||(NewPhase(indx) <= -pi))
-            if (NewPhase(indx) > pi)
-                NewPhase(indx) = NewPhase(indx) - 2*pi;
-            elseif (NewPhase(indx) < -pi)
-                NewPhase(indx) = NewPhase(indx) + 2*pi;
-            end
-        end
-    end
-
-    FinalMeasPhase(subpIndx,:) = NewPhase;
-
-end
-
-
-
-doubleWrapping = 0;
-
-figure(33)
-sgtitle('Phase value from Data sheet with phase correction','FontSize',18) 
-for subpIndx = 1:4
-    subplot(2,2,subpIndx)
-    hold on
-    PhaseOrig = A(2:21,(9 + 4*subpIndx) );
-
-    % unwrapping adjusted phase for plotting
-    [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(FinalMeasPhase(subpIndx,:),LTSi,MidIndx);
-    
-    plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
-    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
-    ylabel("Phase in radians")
-    xlabel("Stable indx")
-    legend("Original angle","Angle with unwrap and phase correction","Location",'best')
-    set(gca,"FontSize",14)
-    titleStr = "Channel " + string((subpIndx-1));
-    title(titleStr,"FontSize",18)
-    hold off
+    FinalMeasPhase(subpIndx,:) = PhaseOrig;
 
 end
 

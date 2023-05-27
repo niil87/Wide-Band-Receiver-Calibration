@@ -1,7 +1,9 @@
 %% Contributions by Nikhil Challa
 clear;clc; close all;
 
-HACK = 0;  % 1 : this hack is to use ch2 for ch0 and ch3 for ch1, 2 : ch2 for all channels
+tic
+
+HACK = 0;  % 0 : No Hack, 1 : Hack with ch2 for ch0 and ch3 for ch1, 2 : Hack with ch2 for all channels
 
 if HACK == 0
     StoreAlphaTau = load('MatFiles/StoreAlphaTau3.mat').StoreAlphaTau;
@@ -12,7 +14,7 @@ else
 end
 
 FinalMeasPhase = load('Matfiles/FinalMeasPhase.mat','FinalMeasPhase').FinalMeasPhase;
-A = xlsread('Data_v5.xlsx');
+A = xlsread('Data.xlsx');
 
 % 0 : Use slope adjusted phase value from Excel
 % 1 : Use Original data or excel sheet directly with no phase adjustment 
@@ -54,7 +56,7 @@ for ChNo = ChNoRange
     end
     PhaseOrig = angle(g(ChNo+1,:));
     %[~,PhaseUnwrap(ChNo+1,:),~] = UnwrapPhaseMonotone(PhaseOrig,LTSi,10);
-    [~,PhaseUnwrap(ChNo+1,:),~] = UnwrapPhase(PhaseOrig,1,2);
+    [~,PhaseUnwrap(ChNo+1,:),~] = F_UnwrapPhase(PhaseOrig,1,2);
     
 end
 
@@ -70,8 +72,9 @@ for ChNo = ChNoRange
     yline([-2*pi,-pi,pi,2*pi],":",{'-2pi','-pi','pi','2pi'},'LabelHorizontalAlignment','left')
     legend("Original Angle","Unwrap Angle",'','','','','Location','best')
     set(gca,"FontSize",14)
-    titleStr = "Channel " + string((ChNo)) + " : Calibration Info";
+    titleStr = "Channel " + string((ChNo));
     title(titleStr,'FontSize',18)
+    sgtitle('Calibration Info','FontSize',18) 
     hold off
 end
 
@@ -79,15 +82,4 @@ end
 CalibrationResults = g;
 save('Matfiles/CalibrationResults.mat','CalibrationResults');
 
-PhaseUnwrap(2,:) = PhaseUnwrap(2,:) + PhaseUnwrap(1,10) - PhaseUnwrap(2,10);
-PhaseUnwrap(3,:) = PhaseUnwrap(3,:) + PhaseUnwrap(1,10) - PhaseUnwrap(3,10);
-PhaseUnwrap(4,:) = PhaseUnwrap(4,:) + PhaseUnwrap(1,10) - PhaseUnwrap(4,10);
-
-figure(2)
-plot(Xindx,PhaseUnwrap(1,:), Xindx,PhaseUnwrap(2,:), Xindx,PhaseUnwrap(3,:), Xindx,PhaseUnwrap(4,:) )
-legend("Channel 1","Channel 2","Channel 3","Channel 4",'Location','best')
-ylim([-pi pi])
-title("Phase Hacked",'FontSize',18)
-
-HackedPhase = exp(1i*PhaseUnwrap);
-save('Matfiles/HackedPhase.mat','HackedPhase');
+toc
