@@ -5,6 +5,8 @@ sympref('FloatingPointOutput',true)
 
 % all units in meters
 T2Rtable = 1.629;   % Minimum distance from Rx table to Tx table
+% T2Rtable = 1.8;     % Recommended value to get mathematically friendly numbers
+
 Fc = 5.725 * 10^9;  % Carrier Frequency
 
 % Calculate wavelength
@@ -29,6 +31,7 @@ SlideStep = result(result > 0)
 %% Calculations for upper limit
 
 % SlideStep = 0.1;      % force setting it to 0.1 to check results
+% SlideStep = 0.16;     % recommended value for mathematically friendly numbers                     
 
 eqn =  sqrt(b^2 + T2Rtable^2) - sqrt( (b - SlideStep)^2 + T2Rtable^2 ) == lambda*higherLimit;
 
