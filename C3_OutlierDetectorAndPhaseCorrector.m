@@ -19,19 +19,20 @@ MeasChIndxRange = 11:635;
 PhaseCorrUnWrapOutlierFixedY = PhaseCorrectedUnwrapY;
 CorrPhaseOutlierFixed = CorrPhase;
     
-figure(1)
-sgtitle('Phase value for each channel with phase unwrapping (Error in Channel 3)','FontSize',18) 
+figure(31)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Phase value for each channel with phase unwrapping (Error in Channel 3)','FontSize',26) 
 for ChNo = ChNoRange
-    subplot(2,2,1+ChNo)
+    nexttile
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(ChNo+1,1:CIR_RATE:end))
     xline(BestLogIndexes)
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
     ylabel("Phase in radians")
     xlabel("Log Sample Index (every sec/skip rest)")
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel No:" + string(ChNo);
-    title(titleStr,'FontSize',18)
+    title(titleStr,'FontSize',22)
     hold off
 end
 
@@ -80,24 +81,26 @@ for indx = 401 : 200 : length(PhaseCorrUnWrapOutlierFixedY)
 
 end
 
-figure(2)
-sgtitle('Phase value for each channel with phase unwrapping and error correction','FontSize',18) 
+figure(32)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Phase value for each channel with phase unwrapping and error correction','FontSize',26) 
 for ChNo = ChNoRange
-    subplot(2,2,ChNo + 1)
+    nexttile
     hold on
     plot(MeasChIndxRange,PhaseCorrectedY(ChNo+1,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrUnWrapOutlierFixedY(ChNo+1,1:CIR_RATE:end))
     xline(BestLogIndexes)
     yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
     ylabel("Phase in radians")
     xlabel("Log Sample Index (every sec/skip rest)")
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel No:" + string(ChNo);
-    title(titleStr,'FontSize',18)
+    title(titleStr,'FontSize',22)
     hold off
 end
 
-figure(3)
-sgtitle('Incorrect Phase unwrapping example','FontSize',18) 
+figure(33)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Incorrect Phase unwrapping example','FontSize',26)
 for ChNo = ChNoRange
     % We attempt to plot one (and only one) case of incorrect phase wrapping
     IndxRange = BadIndx - 200 : 1 : BadIndx;  % since we start from bad case and go backward, the issue will be seen in previous 200 samples at max
@@ -108,7 +111,7 @@ for ChNo = ChNoRange
     XlimMin = floor(min([ PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) - 1;
     XlimMax = ceil(max([PhaseCorrectedUnwrapY(:,IndxRange) TempPh ],[],'all')) + 1;
 
-    subplot(2,2,ChNo + 1)
+    nexttile
     hold on
     plot( IndxRange, PhaseCorrectedUnwrapY(ChNo+1,IndxRange), "rx",IndxRange, TempPh(ChNo+1,:),'bo')
     ylabel("Phase in radians")
@@ -116,9 +119,9 @@ for ChNo = ChNoRange
     ylim([XlimMin  XlimMax])
     xlim([min(IndxRange) max(IndxRange)])
     legend("Unwrapped Attempt","Original Phase","Location","best")
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel No:" + string(ChNo);
-    title(titleStr,'FontSize',18)
+    title(titleStr,'FontSize',22)
     hold off
 
 end
@@ -138,8 +141,11 @@ Ly = floor(min(PhaseCorrectedUnwrapY(BadCh,Range)));
 Hx = window*2;
 Hy = ceil(max(PhaseCorrectedUnwrapY(BadCh,Range))) - Ly;
 
-figure(4)
-subplot(2,1,1)
+figure(34)
+tiledlayout(1,2,'Padding','Compact');
+sgtitle('Before and After phase unwrapping error for Channel3','FontSize',26)
+
+nexttile
 hold on
 plot(MeasChIndxRange,PhaseCorrectedY(BadCh,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrectedUnwrapY(BadCh,1:CIR_RATE:end))
 xline(BestLogIndexes)
@@ -147,12 +153,12 @@ yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
 ylabel("Phase in radians")
 xlabel("Log Sample Index (every sec/skip rest)")
 rectangle('Position',[Lx Ly Hx Hy],'EdgeColor','g')
-set(gca,"FontSize",14)
+set(gca,"FontSize",18)
 titleStr = "Channel No:" + string(ChNo) + "  Phase value with Unwrapping Error";
-title(titleStr,'FontSize',18)
+title(titleStr,'FontSize',22)
 hold off 
 
-subplot(2,1,2)
+nexttile
 hold on
 plot(MeasChIndxRange,PhaseCorrectedY(BadCh,1:CIR_RATE:end),MeasChIndxRange,PhaseCorrUnWrapOutlierFixedY(BadCh,1:CIR_RATE:end))
 xline(BestLogIndexes)
@@ -160,9 +166,9 @@ yline([-pi,pi,2*pi,3*pi,4*pi,5*pi,6*pi,7*pi,8*pi,9*pi])
 ylabel("Phase in radians")
 xlabel("Log Sample Index (every sec/skip rest)")
 rectangle('Position',[Lx Ly Hx Hy],'EdgeColor','g')
-set(gca,"FontSize",14)
+set(gca,"FontSize",18)
 titleStr = "Channel No:" + string(ChNo) + "  Phase value with Unwrapping Error Fixed";
-title(titleStr,'FontSize',18)
+title(titleStr,'FontSize',22)
 hold off 
 
 

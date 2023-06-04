@@ -14,7 +14,7 @@ FirstIndxX = 11;
 MeasChIndxRange = 11:635;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global K X Y_i
+% global K X Y_i
 
 format long
 
@@ -104,17 +104,21 @@ for ChNo = ChIndx
             
                     %%%%%%%%%%%%%% plotting after subracting %%%%%%%%%%%%
                     Pwr = abs( Ac*Y_i/(norm(X,"fro")^2) ) ;
-                    figure(1)
+                    figure(41)
+                    tiledlayout(1,1,'Padding','Compact');
+                    nexttile
                     plot(Pwr(1:plotLimit))
                     ylabel("Scaled Amplitude")
                     xlabel("Time Delay")
                     ylim([0 1])
-                    set(gca,"FontSize",14)
-                    title("Plot of multipath with sequential elimination",'FontSize',18)
+                    set(gca,"FontSize",18)
+                    title("Plot of multipath with sequential elimination",'FontSize',22)
                     grid on
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-                    [Tau_hat(i),fval] = fminunc(@MinFn,Tau_hat(i),options);
+                    MinFn = @(opt_Tau) -1* abs( ( exp(-1i*2*pi*(0:K-1)'*opt_Tau/K ) .* X )' * Y_i );
+
+                    [Tau_hat(i),fval] = fminunc(MinFn,Tau_hat(i),options);
             
                     X_i = X .* exp( -1i*2*pi*(0:K-1)' * Tau_hat(i) / K );
                     Alpha_hat(i) = X_i' * Y_i / norm(X_i,"fro")^2;
@@ -146,23 +150,25 @@ StoreAlphaTau = load('Matfiles/StoreAlphaTau3.mat').StoreAlphaTau;
 MidIndx = length(LTSi) / 2;
 Indx = 1:20;
 
-figure(31)
-
+figure(42)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Phase value after SAGE for LoS Component','FontSize',26) 
 for subpIndx = 1:4
-    subplot(2,2,subpIndx)
+    nexttile
     hold on
     PhaseOrig = angle(StoreAlphaTau(:,subpIndx,2));
     [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
     xlim([0 21])
-    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
+    ylim([-13*pi 5*pi])
+    yline([3*pi, pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable index")
     legend("Original phase","Unwrapped phase","Location",'best')
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel " + string((subpIndx-1));
-    title(titleStr,'FontSize',18)
-    sgtitle('Phase value after SAGE for LoS Component','FontSize',18) 
+    title(titleStr,'FontSize',22)
+    
     hold off
 end
 
@@ -176,21 +182,23 @@ MidIndx = length(LTSi) / 2;
 Indx = 1:20;
 
 FinalMeasPhase = zeros(4,length(LTSi));
-figure(32)
-sgtitle('Phase value from Data sheet','FontSize',18) 
+figure(43)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Phase value from Data sheet','FontSize',26) 
 for subpIndx = 1:4
-    subplot(2,2,subpIndx)
+    nexttile
     hold on
     PhaseOrig = A(2:21,(9 + 4*subpIndx) );
     [~,PhaseUnwrap,~] = F_UnwrapPhaseMonotone(PhaseOrig,LTSi,MidIndx);
     plot(Indx,PhaseOrig,'--x',Indx,PhaseUnwrap,'-o')
-    yline([pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
+    ylim([-13*pi 5*pi])
+    yline([3*pi, pi,-pi,-3*pi,-5*pi,-7*pi,-9*pi,-11*pi,-13*pi])
     ylabel("Phase in radians")
     xlabel("Stable index")
     legend("Original angle","Angle with unwrap","Location",'best')
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel " + string((subpIndx-1));
-    title(titleStr,'FontSize',18)
+    title(titleStr,'FontSize',22)
     hold off
     
     FinalMeasPhase(subpIndx,:) = PhaseOrig;
@@ -201,14 +209,6 @@ save('Matfiles/FinalMeasPhase.mat','FinalMeasPhase');
 
 toc
 
-%% optimizing function
-
-function ArrayMin = MinFn(opt_Tau)
-
-    global K X Y_i
-    ArrayMin = -1* abs( ( exp(-1i*2*pi*(0:K-1)'*opt_Tau/K ) .* X )' * Y_i );
-
-end
 
 
 

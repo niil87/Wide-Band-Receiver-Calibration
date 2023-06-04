@@ -71,14 +71,15 @@ for timeStep = 1:NumTimeSteps
 
 end
 
-figure(1)
+figure(61)
+tiledlayout(1,1,'Padding','Compact');
+nexttile
 plot(1:NumTimeSteps,Angle,'-.',1:NumTimeSteps,doas,'-x',1:NumTimeSteps,doasSage,'-+',1:NumTimeSteps,doasCal,'-o',1:NumTimeSteps,doasSheet,'-*')
-
 xlabel("Position Index")
 ylabel("Direction of arrival in Degrees")
 legend("Ground Truth","Direction of Arrival Estimation","Direction of Arrival Estimation from Sage","Direction of Arrival using Cal data","Direction of Arrival using Sheet data",'Location','best')
 yline([0],'-',{"DOA Estimation Failure Line"},'HandleVisibility','off')
-set(gca,"FontSize",14)
-title("Direction of Arrival plots",'FontSize',18)
+set(gca,"FontSize",18)
+title("Direction of Arrival plots",'FontSize',22)
 
 toc

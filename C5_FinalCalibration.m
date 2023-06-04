@@ -37,19 +37,20 @@ end
 
 Xindx = 1:NumPos;
 
-figure(1)
+figure(51)
+tiledlayout(2,2,'Padding','Compact');
+sgtitle('Calibration Info','FontSize',26) 
 for ChNo = ChNoRange 
-    subplot(2,2,ChNo+1)
+    nexttile
     hold on
     plot(Xindx,angle(g(ChNo+1,:)),'o', Xindx,PhaseUnwrap(ChNo+1,:),'x')
     ylabel("Phase in radians")
     xlabel("Position Index")
     yline([-2*pi,-pi,pi,2*pi],":",{'-2pi','-pi','pi','2pi'},'LabelHorizontalAlignment','left')
     legend("Original Angle","Unwrap Angle",'','','','','Location','best')
-    set(gca,"FontSize",14)
+    set(gca,"FontSize",18)
     titleStr = "Channel " + string((ChNo));
-    title(titleStr,'FontSize',18)
-    sgtitle('Calibration Info','FontSize',18) 
+    title(titleStr,'FontSize',22)
     hold off
 end
 

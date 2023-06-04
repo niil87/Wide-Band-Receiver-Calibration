@@ -32,15 +32,21 @@ TimeSize = 1:2:UpperlimitWindowSize;
 NumCh = size(PhaseCorrectedUnwrapY,1);
 LogIndexes = zeros(NumCh,NumCenters);
 
-figure(20)
+figure(21)
+tiledlayout(1,1,'Padding','Compact');
+nexttile
 plot(PhaseCorrectedUnwrapY(1,:))
 ylabel("Phase in radians")
 xlabel("Log Sample Index (every sec/skip rest)")
-set(gca,"FontSize",14)
-title("Unwrapped phase for Channel 0",'FontSize',18)
+set(gca,"FontSize",18)
+title("Unwrapped phase for Channel 0",'FontSize',26)
 
 exit = 0;
 SumDLimit = 1;
+
+figure(22)
+tiledlayout(2,2,'Padding','Compact');
+
 while(exit == 0)
     exit = 1;
 
@@ -119,14 +125,15 @@ while(exit == 0)
         X = Xstore{bestIndx};
         C = Cstore{bestIndx};
         
-        figure(ChIndx)
+        nexttile
         hold on
         scatter(X(:,1),X(:,2),'.');
         scatter(C(:,1),zeros(length(C),1),'o');
-        titleStr = "Channel No:" + string((ChIndx - 1)) + "  Clustering Data";
-        title(titleStr);
-        xlabel 'Mean'; 
+        xlabel 'Mean';
         ylabel 'Variance';
+        set(gca,"FontSize",18)
+        titleStr = "Channel No:" + string((ChIndx - 1)) + "  Clustering Data";
+        title(titleStr,'FontSize',26)
         hold off
         
         k = dsearchn(X(:,1),C);
@@ -142,13 +149,15 @@ BestLogIndexes = round(mean(LogIndexes,1)) + Offset
 
 PlotIndx = BestLogIndexes - min(MeasChIndxRange);
 
-figure(21)
+figure(23)
+tiledlayout(1,1,'Padding','Compact');
+nexttile
 plot(PhaseCorrectedUnwrapY(1,:))
 xline(PlotIndx*200)
 ylabel("Phase in radians")
 xlabel("Log Sample Index (every sec/skip rest)")
-set(gca,"FontSize",14)
-title("Unwrapped phase for Channel 0 with stable index positions",'FontSize',18)
+set(gca,"FontSize",18)
+title("Unwrapped phase for Channel 0 with stable index positions",'FontSize',26)
     
 
 save('MatFiles/BestLogIndexes.mat','BestLogIndexes');
