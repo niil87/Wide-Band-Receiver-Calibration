@@ -111,8 +111,8 @@ for ChNo = ChIndx
                     ylabel("Scaled Amplitude")
                     xlabel("Time Delay")
                     ylim([0 1])
-                    set(gca,"FontSize",18)
-                    title("Plot of multipath with sequential elimination",'FontSize',22)
+                    set(gca,"FontSize",36)
+                    title("Plot of multipath with sequential elimination",'FontSize',44)
                     grid on
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
