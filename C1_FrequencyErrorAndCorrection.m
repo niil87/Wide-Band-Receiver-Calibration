@@ -62,7 +62,7 @@ for ChNo = ChNoRange
     set(gca,"FontSize",18)
     titleStr = "Channel No:" + string(ChNo);
     title(titleStr,'FontSize',22)
-    sgtitle('Phase value before frequency error correction - B2B Data','FontSize',26)  
+    sgtitle('Phase offset from first sample before frequency error correction - B2B Data','FontSize',26)  
     
     c = polyfit(0:CIR_RATE*SizeB2Bref - 1,PhaseOffsetX(ChNo+1,:),1)
     
@@ -86,7 +86,7 @@ for ChNo = ChNoRange
     set(gca,"FontSize",18)
     titleStr = "Channel No:" + string(ChNo);
     title(titleStr,'FontSize',22)
-    sgtitle('Phase value after frequency error correction - B2B Data','FontSize',24) 
+    sgtitle('Phase offset from first sample after frequency error correction - B2B Data','FontSize',24) 
 
 end
 
@@ -161,7 +161,7 @@ for ChNo = ChNoRange
 
 end
 
-sgtitle('Phase value after removing frequency offset - OTA Data','FontSize',26) 
+sgtitle('Phase value after removing frequency error - OTA Data','FontSize',26) 
 
 save('MatFiles/y_fcorr.mat','y_fcorr','-v7.3');
 save('MatFiles/PhaseCorrectedY.mat','PhaseCorrectedY');
