@@ -12,7 +12,7 @@ Source Code : Most of the effort is manual calculations with one useful code [Ar
 
 Step2 : Data Collection ( section 3.2 ) <br>
 Purpose : Collect both physical measurements as well as OTA and B2B data required for calibration <br>
-Source Code : [USRP Channel Sounder](https://github.com/michielsandra/openucs) (Measurement details are saved in DATA SHEET)
+Source Code : [USRP Channel Sounder](https://github.com/michielsandra/openucs) (Measurement details are saved in [DATA SHEET](https://github.com/niil87/Wide-Band-Receiver-Calibration/blob/main/Data.xlsx))
 
 
 Step3 : Frequency Error Detection and Correction ( section 3.3 ) <br>
