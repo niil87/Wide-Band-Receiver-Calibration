@@ -1,5 +1,5 @@
 # Wide-Band-Receiver-Calibration
-This repo contains files as part of Project work (Advanced Course in Electrical and Information Technology - EITN35) at Lund University in collaboration with Michiel Sandra. We utilize a new (as of 2023) open source hardware, USRP X410 and perform calibration to estimate the phase contributions from the hardware. Utilizing this information, it is possible to estimate the wireless channel coefficients, thereby making it possible to utilize MIMO specific optimization processes such as Maximum Ratio Combining (MRC), Water pouring, and other such methods. 
+This repo contains files as part of Project work (Advanced Course in Electrical and Information Technology - EITN35) at Lund University in collaboration with Michiel Sandra. We utilize a new (as of 2023) open-source hardware, USRP X410, and perform calibration to estimate the phase contributions from the hardware. Utilizing this information, it is possible to estimate the wireless channel coefficients, thereby making it possible to utilize MIMO-specific optimization processes such as Maximum Ratio Combining (MRC), Water pouring, and other such methods.
 
 The Presentation and Report document are located at [PPT_and_Report](https://github.com/niil87/Wide-Band-Receiver-Calibration/tree/main/PPT_and_Report)
 
